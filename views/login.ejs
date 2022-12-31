@@ -18,6 +18,8 @@
         cursor: pointer;
       }
       form {
+        width: 80%;
+        margin: auto;
         border: 3px solid #f1f1f1;
       }
       input[type="text"],
@@ -41,6 +43,10 @@
         padding: 25px;
         background-color: lightblue;
       }
+      .features {
+        display: flex;
+        justify-content: space-between;
+      }
     </style>
   </head>
   <body>
@@ -61,6 +67,10 @@
           name="password"
           required
         />
+        <div class="features">
+          <a href="">Forget password</a>
+          <a href="">Resend the verification link</a>
+        </div>
         <button type="submit">Login</button>
       </div>
     </form>
