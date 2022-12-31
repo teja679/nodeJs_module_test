@@ -54,6 +54,11 @@ app.get("/register", (req, res) => {
  return res.render("register");
 });
 
+app.get("/dashboard", (req, res) => {
+    return res.render("dashboard");
+   });
+   
+// ------------------- REGISTER --------------------
 app.post("/register", async (req, res) => {
     console.log(req.body);
     const { name, username, password, email } = req.body;
@@ -99,7 +104,7 @@ app.post("/register", async (req, res) => {
     try {
       const userDB = await user.save(); // create opt in database
       console.log("userDB", userDB);
-      return res.render("login");
+      return res.redirect("login");
     //   res.send({
     //     status: 201,
     //     message: "Registered successfully",
@@ -118,7 +123,69 @@ app.post("/register", async (req, res) => {
     }
   });
 
+  app.post("/login", async (req, res) => {
+    // loginId can be either email or username
+    console.log(req.body);
+    const { loginId, password } = req.body;
+    if (
+      typeof loginId !== "string" ||
+      typeof password !== "string" ||
+      !loginId ||
+      !password
+    ) {
+      return res.send({
+        status: 400,
+        message: "Invalid Data",
+      });
+    }
   
+    //find() - May return you multiple objects, Returns empty array if nothing matches, returns an array of objects
+    //findOne() - One object, Returns null if nothing matches, returns an object
+    let userDb;
+    try {
+      if (validator.isEmail(loginId)) {
+        userDb = await UserSchema.findOne({ email: loginId });
+      } else {
+        userDb = await UserSchema.findOne({ username: loginId });
+      }
+    } catch (err) {
+      console.log(err);
+      return res.send({
+        status: 400,
+        message: "Internal server error. Please try again",
+        // error: err,
+      });
+    }
+  
+    console.log(userDb);
+  
+    if (!userDb) {
+      return res.send({
+        status: 400,
+        message: "user not found",
+        data: req.body,
+      });
+    }
+  
+    // comparing the password
+    const isMatch = await bcrypt.compare(password, userDb.password);
+  
+    if (!isMatch) {
+      return res.send({
+        status: 400,
+        message: "Invalid password",
+        error: req.body,
+      });
+    }
+    //include session info to check further
+    // req.session.isAuth = true;
+    // req.session.user = {
+    //   username: userDb.username,
+    //   email: userDb.email,
+    //   userId: userDb._id,
+    // };
+    res.redirect("/dashboard");
+  });
 app.listen(4000, () => {
   console.log("Listening on port 4000");
 });
